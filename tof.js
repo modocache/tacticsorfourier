@@ -4,9 +4,6 @@ function FFT()
 	this.sentenceNode = null;
 };
 
-function randomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
 
 FFT.prototype.quotes = {
     tactics: [
@@ -41,6 +38,10 @@ FFT.prototype.quotes = {
     ],
 };
 
+FFT.prototype.randomInt = function (min, max) {
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
 FFT.prototype.init = function () {
 	this.quoteNode = $("blockquote")
 	this.quoteNode.popover({content: "Wrong, asshole."});
@@ -69,15 +70,15 @@ FFT.prototype.isFourierQuote = function(sentence) {
 
 
 FFT.prototype.isCorrect = function(isTactics, sentence) {
-	return isTactics && this.isTacticsQuote(sentence) ||
-				 !isTactics && this.isFourierQuote(sentence)
+	return (isTactics && this.isTacticsQuote(sentence) ||
+				 !isTactics && this.isFourierQuote(sentence));
 };
 
 FFT.prototype.randomQuote =  function() {
 	var types = ["tactics", "fourier"];
-	var typeIndex = randomInt(0, 1);
+	var typeIndex = this.randomInt(0, 1);
 	var quotesSubset = this.quotes[types[typeIndex]];
-	var quoteIndex = randomInt(0, quotesSubset.length - 1);
+	var quoteIndex = this.randomInt(0, quotesSubset.length - 1);
 	return quotesSubset[quoteIndex];
 };
 
@@ -110,5 +111,5 @@ FFT.prototype.tacticsOrFourier = function (isTactics) {
 	this.populateScreen(true);
 };
 
-$(function () {window.brian = new FFT(); window.brian.init();});
+$(function () { window.brian = new FFT(); window.brian.init(); });
 
