@@ -1,14 +1,11 @@
-function randomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+function FFT()
+{
+	this.quoteNode = null;
+	this.sentenceNode = null;
+};
 
-var quoteNode = $("blockquote")
-quoteNode.popover({content: "Wrong, asshole."});
 
-var sentenceNode = $("#sentence");
-sentenceNode.popover({content: "Yeeeah, boy!"});
-
-var quotes = {
+FFT.prototype.quotes = {
     tactics: [
         "FFT is a tactical role-playing game developed and published by Square (now Square Enix) for the Sony PlayStation video game console.",
         "FFT is set in a fictional medieval-inspired kingdom called Ivalice created by Yasumi Matsuno.",
@@ -39,64 +36,80 @@ var quotes = {
         "Cornelius Lanczos did pioneering work on the FFS and FFT with G.C. Danielson (1940).",
         "Rader's algorithm, exploiting the existence of a generator for the multiplicative group modulo prime N, expresses a DFT of prime size n as a cyclic convolution of (composite) size N−1, which can then be computed by a pair of ordinary FFTs via the convolution theorem.",
     ],
-
-    isTacticsQuote: function(sentence) {
-        return (quotes.tactics.indexOf(sentence) > -1);
-    },
-    isFourierQuote: function(sentence) {
-        return (quotes.fourier.indexOf(sentence) > -1);
-    },
-    isCorrect: function(isTactics, sentence) {
-        return isTactics && quotes.isTacticsQuote(sentence) ||
-               !isTactics && quotes.isFourierQuote(sentence)
-    },
-
-    randomQuote: function() {
-        var types = ["tactics", "fourier"];
-        var typeIndex = randomInt(0, 1);
-        var quotesSubset = quotes[types[typeIndex]];
-        var quoteIndex = randomInt(0, quotesSubset.length - 1);
-        return quotesSubset[quoteIndex];
-    }
 };
 
-function setRandomQuote() {
-    sentenceNode.text(quotes.randomQuote());
+FFT.prototype.randomInt = function (min, max) {
+	return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-function hidePopovers() {
-    quoteNode.popover("hide");
-    sentenceNode.popover("hide");
+FFT.prototype.init = function () {
+	this.quoteNode = $("blockquote")
+	this.quoteNode.popover({content: "Wrong, asshole."});
+	this.sentenceNode = $("#sentence");
+	this.sentenceNode.popover({content: "Yeeeah, boy!"});
+
+	$("#tactics").click(function() {
+		window.brian.tacticsOrFourier(true);
+		this.blur();
+	});
+	$("#fourier").click(function() {
+		window.brian.tacticsOrFourier(false);
+		this.blur();
+	});
+
+	this.populateScreen(false);
 };
 
-function populateScreen(animate) {
-    if (animate) {
-        var fadeDuration = 400;
-        sentenceNode.fadeOut(fadeDuration, setRandomQuote)
-                    .fadeIn(fadeDuration, hidePopovers);
-    } else {
-        setRandomQuote();
-    }
+FFT.prototype.isTacticsQuote = function(sentence) {
+	return (this.quotes.tactics.indexOf(sentence) > -1);
 };
 
-function tacticsOrFourier(isTactics) {
-    if (quotes.isCorrect(isTactics, sentenceNode.text())) {
-        sentenceNode.popover("show");
-    } else {
-        quoteNode.popover("show");
-    }
-
-    populateScreen(true);
+FFT.prototype.isFourierQuote = function(sentence) {
+	return (this.quotes.fourier.indexOf(sentence) > -1);
 };
 
-$("#tactics").click(function() {
-    tacticsOrFourier(true);
-    this.blur();
-});
-$("#fourier").click(function() {
-    tacticsOrFourier(false);
-    this.blur();
-});
 
-populateScreen(false);
+FFT.prototype.isCorrect = function(isTactics, sentence) {
+	return (isTactics && this.isTacticsQuote(sentence) ||
+				 !isTactics && this.isFourierQuote(sentence));
+};
+
+FFT.prototype.randomQuote =  function() {
+	var types = ["tactics", "fourier"];
+	var typeIndex = this.randomInt(0, 1);
+	var quotesSubset = this.quotes[types[typeIndex]];
+	var quoteIndex = this.randomInt(0, quotesSubset.length - 1);
+	return quotesSubset[quoteIndex];
+};
+
+FFT.prototype.setRandomQuote = function() {
+	this.sentenceNode.text(this.randomQuote());
+};
+
+FFT.prototype.hidePopovers = function() {
+	this.quoteNode.popover("hide");
+	this.sentenceNode.popover("hide");
+};
+
+FFT.prototype.populateScreen = function(animate) {
+	if (animate) {
+		var fadeDuration = 400;
+		this.sentenceNode.fadeOut(fadeDuration, $.proxy(this.setRandomQuote, this))
+										 .fadeIn(fadeDuration, $.proxy(this.hidePopovers, this));
+	} else {
+		this.setRandomQuote();
+	}
+};
+
+FFT.prototype.tacticsOrFourier = function (isTactics) {
+	if (this.isCorrect(isTactics, this.sentenceNode.text())) {
+		this.sentenceNode.popover("show");
+	} else {
+		this.quoteNode.popover("show");
+	}
+
+	this.populateScreen(true);
+};
+
+$(function () { window.brian = new FFT(); window.brian.init(); });
 
